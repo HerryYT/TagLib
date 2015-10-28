@@ -1,0 +1,453 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 GoMint, BlackyPaw and geNAZt
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
+package io.gomint.taglib;
+
+import java.io.*;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+/**
+ * Represents a compound tag that may hold several children tags.
+ *
+ * @author BlackyPaw
+ * @version 1.0
+ */
+public class NBTTagCompound extends AbstractMap<String, Object> {
+
+	/**
+	 * Reads the NBTTagCompound from the specified file. See {@link #readFrom(InputStream, boolean)} for
+	 * further details.
+	 *
+	 * @param file The file to read the NBTCompound from
+	 * @param compressed Whether or not the input is compressed
+	 *
+	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
+	 *
+	 * @return The compound tag that was read from the input source
+	 */
+	public static NBTTagCompound readFrom( File file, boolean compressed ) throws IOException {
+		try ( FileInputStream in = new FileInputStream( file ) ) {
+			return readFrom( in, compressed );
+		}
+	}
+
+	/**
+	 * Reads the NBTTagCompound from the specified input stream. In case compressed is set to true
+	 * the given input stream will be wrapped in a deflating stream. The implementation is guaranteed
+	 * to wrap the entire stream in a BufferedInputStream so that no unbuffered I/O will ever occur.
+	 * Therefore it is not necessary to wrap the input in a BufferedInputStream manually. The input
+	 * stream is closed automatically.
+	 *
+	 * @param in The input stream to read from
+	 * @param compressed Whether or not the input is compressed
+	 *
+	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
+	 *
+	 * @return The compound tag that was read from the input source
+	 */
+	public static NBTTagCompound readFrom( InputStream in, boolean compressed ) throws IOException {
+		InputStream input = null;
+		try {
+			input = new BufferedInputStream( ( compressed ? new GZIPInputStream( in ) : in ) );
+			NBTReader reader = new NBTReader( input );
+			return reader.parse();
+		} finally {
+			if ( input != null ) {
+				try {
+					input.close();
+				} catch ( IOException e ) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private String name;
+	private Map<String, Object> children;
+
+	/**
+	 * Constructs a new NBTTagCompound given its name. If no name is specified, i.e. name == null,
+	 * the NBTTagCompound is considered to be member of a list.
+	 *
+	 * @param name The name of the tag
+	 */
+	public NBTTagCompound( final String name ) {
+		super();
+		this.name = name;
+		this.children = new HashMap<>();
+	}
+
+	/**
+	 * Gets the name of the tag. May be null if the tag belongs to a list.
+	 *
+	 * @return The name of the tag
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, byte value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, short value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, int value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, long value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, float value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, byte[] value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, String value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, double value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, int[] value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, List value ) {
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified value to the compound given the name used to store it.
+	 *
+	 * @param name The name of the value
+	 * @param value The value to be stored
+	 */
+	public void addValue( String name, NBTTagCompound value ) {
+		if ( !name.equals( value.getName() ) ) {
+			throw new AssertionError( "Failed to add NBTTagCompound with name '" + value.getName() + "' given name '" + name + "'" );
+		}
+		this.children.put( name, value );
+	}
+
+	/**
+	 * Adds the specified tag as a child tag of this compound. This method is effectively the
+	 * same as calling {@link #addValue(String, NBTTagCompound)} and specified tag.getName()
+	 * as the name.
+	 *
+	 * @param tag The tag to be added as a child
+	 */
+	public void addChild( NBTTagCompound tag ) {
+		this.children.put( tag.getName(), tag );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public Byte getByte( String name, Byte defaultValue ) {
+		return ( this.children.containsKey( name ) ? (Byte) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public Short getShort( String name, Short defaultValue ) {
+		return ( this.children.containsKey( name ) ? (Short) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public Integer getInteger( String name, Integer defaultValue ) {
+		return ( this.children.containsKey( name ) ? (Integer) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public Long getLong( String name, Long defaultValue ) {
+		return ( this.children.containsKey( name ) ? (Long) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public Float getFloat( String name, Float defaultValue ) {
+		return ( this.children.containsKey( name ) ? (Float) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public Double getDouble( String name, Double defaultValue ) {
+		return ( this.children.containsKey( name ) ? (Double) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public String getString( String name, String defaultValue ) {
+		return ( this.children.containsKey( name ) ? (String) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public byte[] getByteArray( String name, byte[] defaultValue ) {
+		return ( this.children.containsKey( name ) ? (byte[]) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the attribute with the specified name from the compound if it exists. If not it will
+	 * return the default value instead.
+	 *
+	 * @param name The name of the attribute
+	 * @param defaultValue The default value to return for non-existing attributes
+	 * @return The value of the attribute
+	 */
+	public int[] getIntegerArray( String name, int[] defaultValue ) {
+		return ( this.children.containsKey( name ) ? (int[]) this.children.get( name ) : defaultValue );
+	}
+
+	/**
+	 * Gets the list stored under the specified name. In case the list does not exist and insert is set to
+	 * true a new and empty list with the specified name will be created. If insert is set to false null
+	 * will be returned instead.
+	 *
+	 * @param name The name of the list
+	 * @param insert Whether or not to insert a new and empty list if the list does not exist
+	 * @return The list or null
+	 */
+	@SuppressWarnings( "unchecked" )
+	public List<Object> getList( String name, boolean insert ) {
+		if ( this.children.containsKey( name ) ) {
+			return (List<Object>) this.children.get( name );
+		}
+
+		if ( insert ) {
+			List<Object> backingList = new ArrayList<>( 0 );
+			this.addValue( name, backingList );
+			return backingList;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Gets the compound stored under the specified name. In case the compound does not exist and insert is set to
+	 * true a new and empty compound with the specified name will be created. If insert is set to false null
+	 * will be returned instead.
+	 *
+	 * @param name The name of the compound
+	 * @param insert Whether or not to insert a new and empty compound if the compound does not exist
+	 * @return The compound or null
+	 */
+	public NBTTagCompound getCompound( String name, boolean insert ) {
+		if ( this.children.containsKey( name ) ) {
+			return (NBTTagCompound) this.children.get( name );
+		}
+
+		if ( insert ) {
+			NBTTagCompound compound = new NBTTagCompound( name );
+			this.addValue( name, compound );
+			return compound;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Writes the NBTTagCompound to the specified file. See {@link #writeTo(OutputStream, boolean)} for
+	 * further details.
+	 *
+	 * @param file The file to write the NBTCompound to
+	 * @param compressed Whether or not the output should be compressed
+	 *
+	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
+	 */
+	public void writeTo( File file, boolean compressed ) throws IOException {
+		try ( FileOutputStream out = new FileOutputStream( file ) ) {
+			this.writeTo( out, compressed );
+		}
+	}
+
+	/**
+	 * Writes the NBTTagCompound to the specified output stream. In case compressed is set to true
+	 * the given output stream will be wrapped in an inflating stream. The implementation is guaranteed
+	 * to wrap the entire stream in a BufferedOutputStream so that no unbuffered I/O will ever occur.
+	 * Therefore it is not necessary to wrap the output in a BufferedOutputStream manually. The output
+	 * stream is closed automatically.
+	 *
+	 * @param out The output stream to write to
+	 * @param compressed Whether or not the output is compressed
+	 *
+	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
+	 */
+	public void writeTo( OutputStream out, boolean compressed ) throws IOException {
+		OutputStream output = null;
+		try {
+			output = new BufferedOutputStream( ( compressed ? new GZIPOutputStream( out ) : out ) );
+			NBTWriter writer = new NBTWriter( output );
+			writer.write( this );
+		} finally {
+			if ( output != null ) {
+				try {
+					output.close();
+ 				} catch ( IOException e ) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@Override
+	public Set<Entry<String, Object>> entrySet() {
+		return this.children.entrySet();
+	}
+
+	NBTTagCompound() {
+		super();
+		this.name = null;
+		this.children = new HashMap<>();
+	}
+
+	/**
+	 * @deprecated For internal use only!
+	 */
+	void setName( String name ) {
+		this.name = name;
+	}
+}
