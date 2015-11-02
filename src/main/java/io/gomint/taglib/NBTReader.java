@@ -41,7 +41,7 @@ class NBTReader {
 	private static final int BUFFER_SIZE = 1024 * 16;
 
 	private InputStream in;
-	private ByteBuffer  buffer;
+	private ByteBuffer buffer;
 
 	public NBTReader( InputStream in ) {
 		this.in = in;
@@ -119,7 +119,6 @@ class NBTReader {
 		byte listType = this.buffer.get();
 		int listLength = this.readIntValue();
 		List<Object> backingList = new ArrayList<>( listLength );
-		ReadMethod reader = null;
 
 		switch( listType ) {
 			case NBTDefinitions.TAG_END:
@@ -128,47 +127,64 @@ class NBTReader {
 				break;
 			case NBTDefinitions.TAG_BYTE:
 				this.expectInput( listLength, "Invalid NBT Data: Expected bytes for list" );
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readByteValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readByteValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_SHORT:
 				this.expectInput( 2 * listLength, "Invalid NBT Data: Expected shorts for list" );
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readShortValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readShortValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_INT:
 				this.expectInput( 4 * listLength, "Invalid NBT Data: Expected ints for list" );
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readIntValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readIntValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_LONG:
 				this.expectInput( 8 * listLength, "Invalid NBT Data: Expected longs for list" );
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readLongValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readLongValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_FLOAT:
 				this.expectInput( 4 * listLength, "Invalid NBT Data: Expected floats for list" );
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readFloatValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readFloatValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_DOUBLE:
 				this.expectInput( 8 * listLength, "Invalid NBT Data: Expected doubles for list" );
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readDoubleValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readDoubleValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_BYTE_ARRAY:
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readByteArrayValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readByteArrayValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_LIST:
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readTagListValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readTagListValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_COMPOUND:
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readTagCompoundValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readTagCompoundValue() );
+				}
 				break;
 			case NBTDefinitions.TAG_INT_ARRAY:
-				reader = new ReadMethod() { @Override public Object read() throws IOException { return NBTReader.this.readIntArrayValue(); } };
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readIntArrayValue() );
+				}
 				break;
 			default:
 				throw new IOException( "Invalid NBT Data: Unknown tag <" + listType + ">" );
 		}
 
-		for ( int i = 0; i < listLength; ++i ) {
-			backingList.add( reader.read() );
-		}
 		return backingList;
 	}
 
@@ -282,16 +298,26 @@ class NBTReader {
 			System.arraycopy( this.buffer.array(), this.buffer.position(), this.buffer.array(), 0, this.buffer.remaining() );
 			this.buffer.limit( this.buffer.remaining() );
 			this.buffer.position( 0 );
-		}
 
-		int read = this.in.read( this.buffer.array(), this.buffer.limit(), this.buffer.capacity() - this.buffer.limit() );
-		if ( read == -1 ) {
-			throw new IOException( "NBT input ended unexpectedly!", new IOException( message ) );
-		}
+			int read = this.in.read( this.buffer.array(), this.buffer.limit(), this.buffer.capacity() - this.buffer.limit() );
+			if ( read == -1 ) {
+				throw new IOException( "NBT input ended unexpectedly!", new IOException( message ) );
+			}
 
-		// Flip does not really fit here:
-		this.buffer.limit( this.buffer.limit() + read );
-		this.buffer.position( 0 );
+			// Flip does not really fit here:
+			this.buffer.limit( this.buffer.limit() + read );
+			this.buffer.position( 0 );
+		} else {
+			// Speedier variant if applicable (that is the case quite often, as the buffer is a power of two):
+			int read = this.in.read( this.buffer.array(), 0, this.buffer.capacity() );
+			if ( read == -1 ) {
+				throw new IOException( "NBT input ended unexpectedly!", new IOException( message ) );
+			}
+
+			// Flip does not really fit here:
+			this.buffer.limit( read );
+			this.buffer.position( 0 );
+		}
 	}
 
 }
