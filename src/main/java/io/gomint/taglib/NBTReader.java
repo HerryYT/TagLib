@@ -109,6 +109,7 @@ class NBTReader {
 					throw new IOException( "Invalid NBT Data: Unknown tag <" + tagID + ">" );
 			}
 
+			this.expectInput( 1, "Invalid NBT Data: Expected tag ID in tag compound" );
 			tagID = this.buffer.get();
 		}
 		return compound;
