@@ -26,6 +26,7 @@
 package io.gomint.taglib;
 
 import java.io.*;
+import java.nio.ByteOrder;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -39,7 +40,7 @@ import java.util.zip.GZIPOutputStream;
 public class NBTTagCompound extends AbstractMap<String, Object> {
 
 	/**
-	 * Reads the NBTTagCompound from the specified file. See {@link #readFrom(InputStream, boolean)} for
+	 * Reads the NBTTagCompound from the specified file. See {@link #readFrom(InputStream, boolean, ByteOrder)} for
 	 * further details.
 	 *
 	 * @param file The file to read the NBTCompound from
@@ -49,9 +50,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 *
 	 * @return The compound tag that was read from the input source
 	 */
-	public static NBTTagCompound readFrom( File file, boolean compressed ) throws IOException {
+	public static NBTTagCompound readFrom( File file, boolean compressed, ByteOrder byteOrder ) throws IOException {
 		try ( FileInputStream in = new FileInputStream( file ) ) {
-			return readFrom( in, compressed );
+			return readFrom( in, compressed, byteOrder );
 		}
 	}
 
@@ -69,11 +70,11 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 *
 	 * @return The compound tag that was read from the input source
 	 */
-	public static NBTTagCompound readFrom( InputStream in, boolean compressed ) throws IOException {
+	public static NBTTagCompound readFrom( InputStream in, boolean compressed, ByteOrder byteOrder ) throws IOException {
 		InputStream input = null;
 		try {
 			input = new BufferedInputStream( ( compressed ? new GZIPInputStream( in ) : in ) );
-			NBTReader reader = new NBTReader( input );
+			NBTReader reader = new NBTReader( input, byteOrder );
 			return reader.parse();
 		} finally {
 			if ( input != null ) {
@@ -390,17 +391,18 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	}
 
 	/**
-	 * Writes the NBTTagCompound to the specified file. See {@link #writeTo(OutputStream, boolean)} for
+	 * Writes the NBTTagCompound to the specified file. See {@link #writeTo(OutputStream, boolean, ByteOrder)} for
 	 * further details.
 	 *
 	 * @param file The file to write the NBTCompound to
 	 * @param compressed Whether or not the output should be compressed
+	 * @param byteOrder The byteorder to use
 	 *
 	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
 	 */
-	public void writeTo( File file, boolean compressed ) throws IOException {
+	public void writeTo( File file, boolean compressed, ByteOrder byteOrder ) throws IOException {
 		try ( FileOutputStream out = new FileOutputStream( file ) ) {
-			this.writeTo( out, compressed );
+			this.writeTo( out, compressed, byteOrder );
 		}
 	}
 
@@ -413,14 +415,15 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 *
 	 * @param out The output stream to write to
 	 * @param compressed Whether or not the output is compressed
+	 * @param byteOrder The byteorder to use
 	 *
 	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
 	 */
-	public void writeTo( OutputStream out, boolean compressed ) throws IOException {
+	public void writeTo( OutputStream out, boolean compressed, ByteOrder byteOrder ) throws IOException {
 		OutputStream output = null;
 		try {
 			output = new BufferedOutputStream( ( compressed ? new GZIPOutputStream( out ) : out ) );
-			NBTWriter writer = new NBTWriter( output );
+			NBTWriter writer = new NBTWriter( output, byteOrder );
 			writer.write( this );
 		} finally {
 			if ( output != null ) {

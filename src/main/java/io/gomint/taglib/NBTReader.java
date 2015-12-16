@@ -29,6 +29,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,12 +43,15 @@ class NBTReader {
 
 	private InputStream in;
 	private ByteBuffer buffer;
+	private ByteOrder byteOrder;
 
-	public NBTReader( InputStream in ) {
+	public NBTReader( InputStream in, ByteOrder byteOrder ) {
 		this.in = in;
+		this.byteOrder = byteOrder;
 
 		byte[] arrayBuffer = new byte[BUFFER_SIZE];
 		this.buffer = ByteBuffer.wrap( arrayBuffer );
+		this.buffer.order( byteOrder );
 		this.buffer.limit( 0 );
 		this.buffer.position( 0 );
 	}
@@ -57,6 +61,7 @@ class NBTReader {
 		if ( this.buffer.remaining() < 3 || this.buffer.get() != NBTDefinitions.TAG_COMPOUND ) {
 			throw new IOException( "Invalid NBT Data: No root tag found" );
 		}
+
 		String name = this.readStringValue();
 		NBTTagCompound root = this.readTagCompoundValue();
 		root.setName( name );
@@ -204,49 +209,27 @@ class NBTReader {
 
 	private short readShortValue() throws IOException {
 		this.expectInput( 2, "Invalid NBT Data: Expected short" );
-		return (short) ( ( ( this.buffer.get() & 0xFF ) << 8 ) | ( this.buffer.get() & 0xFF ) );
+		return this.buffer.getShort();
 	}
 
 	private int readIntValue() throws IOException {
 		this.expectInput( 4, "Invalid NBT Data: Expected int" );
-		return (int) ( ( ( this.buffer.get() & 0xFF ) << 24 ) |
-		               ( ( this.buffer.get() & 0xFF ) << 16 ) |
-		               ( ( this.buffer.get() & 0xFF ) << 8 ) |
-		               ( ( this.buffer.get() & 0xFF ) ) );
+		return this.buffer.getInt();
 	}
 
 	private long readLongValue() throws IOException {
 		this.expectInput( 8, "Invalid NBT Data: Expected long" );
-		return ( ( (long) ( this.buffer.get() & 0xFF ) << 56 ) |
-		         ( (long) ( this.buffer.get() & 0xFF ) << 48 ) |
-		         ( (long) ( this.buffer.get() & 0xFF ) << 40 ) |
-		         ( (long) ( this.buffer.get() & 0xFF ) << 32 ) |
-		         ( ( this.buffer.get() & 0xFF ) << 24 ) |
-		         ( ( this.buffer.get() & 0xFF ) << 16 ) |
-		         ( ( this.buffer.get() & 0xFF ) << 8 ) |
-		         ( ( this.buffer.get() & 0xFF ) ) );
+		return this.buffer.getLong();
 	}
 
 	private float readFloatValue() throws IOException {
 		this.expectInput( 4, "Invalid NBT Data: Expected float" );
-		int i = (int) ( ( ( this.buffer.get() & 0xFF ) << 24 ) |
-		                ( ( this.buffer.get() & 0xFF ) << 16 ) |
-		                ( ( this.buffer.get() & 0xFF ) << 8 ) |
-		                ( ( this.buffer.get() & 0xFF ) ) );
-		return Float.intBitsToFloat( i );
+		return this.buffer.getFloat();
 	}
 
 	private double readDoubleValue() throws IOException {
 		this.expectInput( 8, "Invalid NBT Data: Expected double" );
-		long l = ( ( (long) ( this.buffer.get() & 0xFF ) << 56 ) |
-		           ( (long) ( this.buffer.get() & 0xFF ) << 48 ) |
-		           ( (long) ( this.buffer.get() & 0xFF ) << 40 ) |
-		           ( (long) ( this.buffer.get() & 0xFF ) << 32 ) |
-		           ( ( this.buffer.get() & 0xFF ) << 24 ) |
-		           ( ( this.buffer.get() & 0xFF ) << 16 ) |
-		           ( ( this.buffer.get() & 0xFF ) << 8 ) |
-		           ( ( this.buffer.get() & 0xFF ) ) );
-		return Double.longBitsToDouble( l );
+		return this.buffer.getDouble();
 	}
 
 	private byte[] readByteArrayValue() throws IOException {
@@ -280,6 +263,7 @@ class NBTReader {
 			int length = this.buffer.remaining();
 			System.arraycopy( this.buffer.array(), this.buffer.position(), newArray, 0, length );
 			this.buffer = ByteBuffer.wrap( newArray );
+			this.buffer.order( this.byteOrder );
 			this.buffer.limit( length );
 			this.buffer.position( 0 );
 		}

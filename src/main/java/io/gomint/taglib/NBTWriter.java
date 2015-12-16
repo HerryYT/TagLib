@@ -44,14 +44,14 @@ class NBTWriter {
 	private OutputStream out;
 	private ByteBuffer   buffer;
 
-	public NBTWriter( final OutputStream out ) {
+	public NBTWriter( final OutputStream out, final ByteOrder byteOrder ) {
 		this.out = out;
 
 		byte[] array = new byte[BUFFER_SIZE];
 		this.buffer = ByteBuffer.wrap( array );
 		this.buffer.position( 0 );
 		this.buffer.limit( this.buffer.capacity() );
-		this.buffer.order( ByteOrder.BIG_ENDIAN );
+		this.buffer.order( byteOrder );
 	}
 
 	public void write( NBTTagCompound compound ) throws IOException {
