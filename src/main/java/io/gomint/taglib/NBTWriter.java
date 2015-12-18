@@ -37,7 +37,7 @@ import java.util.Map;
  * @author BlackyPaw
  * @version 1.0
  */
-class NBTWriter {
+public class NBTWriter {
 
 	private static final int BUFFER_SIZE = 1024 * 16;
 

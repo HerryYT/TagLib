@@ -37,7 +37,7 @@ import java.util.List;
  * @author BlackyPaw
  * @version 1.0
  */
-class NBTReader {
+public class NBTReader {
 
 	private static final int BUFFER_SIZE = 1024 * 16;
 
