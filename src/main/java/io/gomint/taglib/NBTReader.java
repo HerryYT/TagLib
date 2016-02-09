@@ -172,6 +172,11 @@ public class NBTReader {
 					backingList.add( this.readByteArrayValue() );
 				}
 				break;
+			case NBTDefinitions.TAG_STRING:
+				for ( int i = 0; i < listLength; ++i ) {
+					backingList.add( this.readStringValue() );
+				}
+				break;
 			case NBTDefinitions.TAG_LIST:
 				for ( int i = 0; i < listLength; ++i ) {
 					backingList.add( this.readTagListValue() );

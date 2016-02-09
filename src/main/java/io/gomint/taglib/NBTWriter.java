@@ -67,10 +67,14 @@ public class NBTWriter {
 	}
 
 	private void writeStringValue( String value ) throws IOException {
-		byte[] utf8Bytes = value.getBytes( StandardCharsets.UTF_8 );
-		this.ensureCapacity( 2 + utf8Bytes.length );
-		this.writeShortValue( (short) utf8Bytes.length );
-		this.buffer.put( utf8Bytes );
+		if ( value != null ) {
+			byte[] utf8Bytes = value.getBytes( StandardCharsets.UTF_8 );
+			this.ensureCapacity( 2 + utf8Bytes.length );
+			this.writeShortValue( (short) utf8Bytes.length );
+			this.buffer.put( utf8Bytes );
+		} else {
+			this.writeShortValue( (short) 0 );
+		}
 	}
 
 	private void writeByteValue( byte value ) throws IOException {
