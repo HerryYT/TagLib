@@ -8,6 +8,20 @@
     <artifactId>taglib</artifactId>
     <version>0.2.1</version>
 
+    <!-- Distribution Management -->
+    <distributionManagement>
+        <repository>
+            <id>gomint-repo</id>
+            <name>GoMint Release Repository</name>
+            <url>https://repo.gomint.io/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>gomint-snapshots</id>
+            <name>GoMint Snapshot Repository</name>
+            <url>https://repo.gomint.io/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <finalName>TagLib</finalName>
         <plugins>
