@@ -47,56 +47,57 @@ public class NBTStream extends NBTStreamReader {
 
     private void readTagCompoundValue( String path ) throws IOException {
         this.expectInput( 1, "Invalid NBT Data: Expected Tag ID in compound tag" );
-        byte tagID = this.buffer.get();
-        path += "." + this.readStringValue();
+        byte tagID = this.readByteValue();
 
         while ( tagID != NBTDefinitions.TAG_END ) {
+            String currentPath = path + "." + this.readStringValue();
+
             switch ( tagID ) {
                 case NBTDefinitions.TAG_BYTE:
-                    this.nbtStreamListener.onNBTValue( path, this.readByteValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readByteValue() );
                     break;
                 case NBTDefinitions.TAG_SHORT:
-                    this.nbtStreamListener.onNBTValue( path, this.readShortValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readShortValue() );
                     break;
                 case NBTDefinitions.TAG_INT:
-                    this.nbtStreamListener.onNBTValue( path, this.readIntValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readIntValue() );
                     break;
                 case NBTDefinitions.TAG_LONG:
-                    this.nbtStreamListener.onNBTValue( path, this.readLongValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readLongValue() );
                     break;
                 case NBTDefinitions.TAG_FLOAT:
-                    this.nbtStreamListener.onNBTValue( path, this.readFloatValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readFloatValue() );
                     break;
                 case NBTDefinitions.TAG_DOUBLE:
-                    this.nbtStreamListener.onNBTValue( path, this.readDoubleValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readDoubleValue() );
                     break;
                 case NBTDefinitions.TAG_BYTE_ARRAY:
-                    this.nbtStreamListener.onNBTValue( path, this.readByteArrayValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readByteArrayValue() );
                     break;
                 case NBTDefinitions.TAG_STRING:
-                    this.nbtStreamListener.onNBTValue( path, this.readStringValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readStringValue() );
                     break;
                 case NBTDefinitions.TAG_LIST:
-                    this.readTagListValue( path );
+                    this.readTagListValue( currentPath );
                     break;
                 case NBTDefinitions.TAG_COMPOUND:
-                    this.readTagCompoundValue( path );
+                    this.readTagCompoundValue( currentPath );
                     break;
                 case NBTDefinitions.TAG_INT_ARRAY:
-                    this.nbtStreamListener.onNBTValue( path, this.readIntArrayValue() );
+                    this.nbtStreamListener.onNBTValue( currentPath, this.readIntArrayValue() );
                     break;
                 default:
                     throw new IOException( "Invalid NBT Data: Unknown tag <" + tagID + ">" );
             }
 
             this.expectInput( 1, "Invalid NBT Data: Expected tag ID in tag compound" );
-            tagID = this.buffer.get();
+            tagID = this.readByteValue();
         }
     }
 
     private void readTagListValue( String path ) throws IOException {
         this.expectInput( 5, "Invalid NBT Data: Expected TAGList header" );
-        byte listType = this.buffer.get();
+        byte listType = this.readByteValue();
         int listLength = this.readIntValue();
 
         switch( listType ) {

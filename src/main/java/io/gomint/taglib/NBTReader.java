@@ -56,7 +56,7 @@ public class NBTReader extends NBTStreamReader {
 	private NBTTagCompound readTagCompoundValue() throws IOException {
 		NBTTagCompound compound = new NBTTagCompound();
 		this.expectInput( 1, "Invalid NBT Data: Expected Tag ID in compound tag" );
-		byte tagID = this.buffer.get();
+		byte tagID = this.readByteValue();
 		while ( tagID != NBTDefinitions.TAG_END ) {
 			switch ( tagID ) {
 				case NBTDefinitions.TAG_BYTE:
@@ -100,14 +100,14 @@ public class NBTReader extends NBTStreamReader {
 			}
 
 			this.expectInput( 1, "Invalid NBT Data: Expected tag ID in tag compound" );
-			tagID = this.buffer.get();
+			tagID = this.readByteValue();
 		}
 		return compound;
 	}
 	
 	private List<Object> readTagListValue() throws IOException {
 		this.expectInput( 5, "Invalid NBT Data: Expected TAGList header" );
-		byte listType = this.buffer.get();
+		byte listType = this.readByteValue();
 		int listLength = this.readIntValue();
 		List<Object> backingList = new ArrayList<>( listLength );
 
