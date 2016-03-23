@@ -11,7 +11,8 @@ public interface NBTStreamListener {
      *
      * @param path  The NBT Path of this value. For example "Level.xPos"
      * @param value The NBT Value of this path. For example 8
+     * @throws Exception An exception which occured while handling this path.
      */
-    void onNBTValue( String path, Object value );
+    void onNBTValue( String path, Object value ) throws Exception;
 
 }

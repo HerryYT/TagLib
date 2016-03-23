@@ -29,7 +29,7 @@ public class NBTStream extends NBTStreamReader {
         }
     }
 
-    public void parse() throws IOException {
+    public void parse() throws Exception {
         state = StreamState.PARSING;
 
         if ( this.nbtStreamListener == null ) {
@@ -45,7 +45,7 @@ public class NBTStream extends NBTStreamReader {
         this.readTagCompoundValue( this.readStringValue() );
     }
 
-    private void readTagCompoundValue( String path ) throws IOException {
+    private void readTagCompoundValue( String path ) throws Exception {
         this.expectInput( 1, "Invalid NBT Data: Expected Tag ID in compound tag" );
         byte tagID = this.readByteValue();
 
@@ -95,7 +95,7 @@ public class NBTStream extends NBTStreamReader {
         }
     }
 
-    private void readTagListValue( String path ) throws IOException {
+    private void readTagListValue( String path ) throws Exception {
         this.expectInput( 5, "Invalid NBT Data: Expected TAGList header" );
         byte listType = this.readByteValue();
         int listLength = this.readIntValue();
