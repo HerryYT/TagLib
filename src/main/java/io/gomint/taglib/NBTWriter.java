@@ -43,9 +43,11 @@ public class NBTWriter {
 
 	private OutputStream out;
 	private ByteBuffer   buffer;
+    private ByteOrder    order;
 
 	public NBTWriter( final OutputStream out, final ByteOrder byteOrder ) {
 		this.out = out;
+        this.order = byteOrder;
 
 		byte[] array = new byte[BUFFER_SIZE];
 		this.buffer = ByteBuffer.wrap( array );
@@ -261,7 +263,7 @@ public class NBTWriter {
 				this.buffer = ByteBuffer.wrap( newArray );
 				this.buffer.position( 0 );
 				this.buffer.limit( this.buffer.capacity() );
-				this.buffer.order( ByteOrder.BIG_ENDIAN );
+				this.buffer.order( order );
 			} else {
 				// Flush out all data so far:
 				this.flush();
