@@ -25,9 +25,21 @@
 
 package io.gomint.taglib;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteOrder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -37,18 +49,17 @@ import java.util.zip.GZIPOutputStream;
  * @author BlackyPaw
  * @version 1.0
  */
-public class NBTTagCompound extends AbstractMap<String, Object> {
+public class NBTTagCompound implements Cloneable {
 
 	/**
 	 * Reads the NBTTagCompound from the specified file. See {@link #readFrom(InputStream, boolean, ByteOrder)} for
 	 * further details.
 	 *
-	 * @param file The file to read the NBTCompound from
+	 * @param file       The file to read the NBTCompound from
 	 * @param compressed Whether or not the input is compressed
 	 *
-	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
-	 *
 	 * @return The compound tag that was read from the input source
+	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
 	 */
 	public static NBTTagCompound readFrom( File file, boolean compressed, ByteOrder byteOrder ) throws IOException {
 		try ( FileInputStream in = new FileInputStream( file ) ) {
@@ -63,12 +74,11 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Therefore it is not necessary to wrap the input in a BufferedInputStream manually. The input
 	 * stream is closed automatically.
 	 *
-	 * @param in The input stream to read from
+	 * @param in         The input stream to read from
 	 * @param compressed Whether or not the input is compressed
 	 *
-	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
-	 *
 	 * @return The compound tag that was read from the input source
+	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
 	 */
 	public static NBTTagCompound readFrom( InputStream in, boolean compressed, ByteOrder byteOrder ) throws IOException {
 		InputStream input = null;
@@ -87,7 +97,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 		}
 	}
 
-	private String name;
+	private String              name;
 	private Map<String, Object> children;
 
 	/**
@@ -114,7 +124,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, byte value ) {
@@ -124,7 +134,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, short value ) {
@@ -134,7 +144,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, int value ) {
@@ -144,7 +154,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, long value ) {
@@ -154,7 +164,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, float value ) {
@@ -164,7 +174,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, byte[] value ) {
@@ -174,7 +184,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, String value ) {
@@ -184,7 +194,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, double value ) {
@@ -194,7 +204,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, int[] value ) {
@@ -204,7 +214,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, List value ) {
@@ -214,7 +224,7 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	/**
 	 * Adds the specified value to the compound given the name used to store it.
 	 *
-	 * @param name The name of the value
+	 * @param name  The name of the value
 	 * @param value The value to be stored
 	 */
 	public void addValue( String name, NBTTagCompound value ) {
@@ -239,8 +249,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public Byte getByte( String name, Byte defaultValue ) {
@@ -251,8 +262,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public Short getShort( String name, Short defaultValue ) {
@@ -263,8 +275,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public Integer getInteger( String name, Integer defaultValue ) {
@@ -275,8 +288,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public Long getLong( String name, Long defaultValue ) {
@@ -287,8 +301,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public Float getFloat( String name, Float defaultValue ) {
@@ -299,8 +314,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public Double getDouble( String name, Double defaultValue ) {
@@ -311,8 +327,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public String getString( String name, String defaultValue ) {
@@ -323,8 +340,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public byte[] getByteArray( String name, byte[] defaultValue ) {
@@ -335,8 +353,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Gets the attribute with the specified name from the compound if it exists. If not it will
 	 * return the default value instead.
 	 *
-	 * @param name The name of the attribute
+	 * @param name         The name of the attribute
 	 * @param defaultValue The default value to return for non-existing attributes
+	 *
 	 * @return The value of the attribute
 	 */
 	public int[] getIntegerArray( String name, int[] defaultValue ) {
@@ -348,8 +367,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * true a new and empty list with the specified name will be created. If insert is set to false null
 	 * will be returned instead.
 	 *
-	 * @param name The name of the list
+	 * @param name   The name of the list
 	 * @param insert Whether or not to insert a new and empty list if the list does not exist
+	 *
 	 * @return The list or null
 	 */
 	@SuppressWarnings( "unchecked" )
@@ -372,8 +392,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * true a new and empty compound with the specified name will be created. If insert is set to false null
 	 * will be returned instead.
 	 *
-	 * @param name The name of the compound
+	 * @param name   The name of the compound
 	 * @param insert Whether or not to insert a new and empty compound if the compound does not exist
+	 *
 	 * @return The compound or null
 	 */
 	public NBTTagCompound getCompound( String name, boolean insert ) {
@@ -394,9 +415,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Writes the NBTTagCompound to the specified file. See {@link #writeTo(OutputStream, boolean, ByteOrder)} for
 	 * further details.
 	 *
-	 * @param file The file to write the NBTCompound to
+	 * @param file       The file to write the NBTCompound to
 	 * @param compressed Whether or not the output should be compressed
-	 * @param byteOrder The byteorder to use
+	 * @param byteOrder  The byteorder to use
 	 *
 	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
 	 */
@@ -413,9 +434,9 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 	 * Therefore it is not necessary to wrap the output in a BufferedOutputStream manually. The output
 	 * stream is closed automatically.
 	 *
-	 * @param out The output stream to write to
+	 * @param out        The output stream to write to
 	 * @param compressed Whether or not the output is compressed
-	 * @param byteOrder The byteorder to use
+	 * @param byteOrder  The byteorder to use
 	 *
 	 * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
 	 */
@@ -429,16 +450,81 @@ public class NBTTagCompound extends AbstractMap<String, Object> {
 			if ( output != null ) {
 				try {
 					output.close();
- 				} catch ( IOException e ) {
+				} catch ( IOException e ) {
 					e.printStackTrace();
 				}
 			}
 		}
 	}
 
-	@Override
-	public Set<Entry<String, Object>> entrySet() {
+	/**
+	 * Returns an iterable set of entries this tag compound holds.
+	 *
+	 * @return The set of entries the compound holds
+	 */
+	public Set<Map.Entry<String, Object>> entrySet() {
 		return this.children.entrySet();
+	}
+
+	/**
+	 * Checks whether or not the compound contains a child tag with the specified name.
+	 *
+	 * @param key The name of the child tag
+	 * @return Whether or not the compound contains a child tag with the specified name
+	 */
+	public boolean containsKey( String key ) {
+		return this.children.containsKey( key );
+	}
+
+	/**
+	 * Clones the compound and all of its non-immutable elements recursively. This operation
+	 * may be expensive so use it only if absolutely necessary.
+	 *
+	 * @return The cloned tag compound.
+	 */
+	public NBTTagCompound deepClone() {
+		NBTTagCompound compound = new NBTTagCompound();
+		compound.name = this.name;
+		compound.children = new HashMap<>( this.children.size() );
+		for ( Map.Entry<String, Object> child : this.children.entrySet() ) {
+			Object value = child.getValue();
+			if ( value instanceof byte[] ) {
+				byte[] data = (byte[]) value;
+				compound.addValue( child.getKey(), Arrays.copyOf( data, data.length ) );
+			} else if ( value instanceof List ) {
+				compound.addValue( child.getKey(), this.deepCloneList( (List) value ) );
+			} else if ( value instanceof int[] ) {
+				int[] data = (int[]) value;
+				compound.addValue( child.getKey(), Arrays.copyOf( data, data.length ) );
+			} else if ( value instanceof NBTTagCompound ) {
+				compound.addChild( ( ( NBTTagCompound ) value ).deepClone() );
+			} else {
+				// Other supported types are immutable:
+				compound.children.put( child.getKey(), child.getValue() );
+			}
+		}
+		return compound;
+	}
+
+	private List deepCloneList( List input ) {
+		List output = new ArrayList( input.size() );
+		for ( Object value : input ) {
+			if ( value instanceof byte[] ) {
+				byte[] data = (byte[]) value;
+				output.add( Arrays.copyOf( data, data.length ) );
+			} else if ( value instanceof List ) {
+				output.add( this.deepCloneList( (List) value ) );
+			} else if ( value instanceof int[] ) {
+				int[] data = (int[]) value;
+				output.add( Arrays.copyOf( data, data.length ) );
+			} else if ( value instanceof NBTTagCompound ) {
+				output.add( ( ( NBTTagCompound ) value ).deepClone() );
+			} else {
+				// Other supported types are immutable:
+				output.add( value );
+			}
+		}
+		return output;
 	}
 
 	NBTTagCompound() {

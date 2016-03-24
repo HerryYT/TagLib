@@ -7,7 +7,7 @@ package io.gomint.taglib;
 public interface NBTStreamListener {
 
     /**
-     * Gets invoked when a NBT node has been read. After this invokation the value is discarded.
+     * Gets invoked when a NBT node has been read. After this invocation the value is discarded.
      *
      * @param path  The NBT Path of this value. For example "Level.xPos"
      * @param value The NBT Value of this path. For example 8
