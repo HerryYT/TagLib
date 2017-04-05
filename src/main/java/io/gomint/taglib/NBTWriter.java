@@ -45,6 +45,8 @@ public class NBTWriter {
 	private ByteBuffer   buffer;
     private ByteOrder    order;
 
+    private boolean useVarint;
+
 	public NBTWriter( final OutputStream out, final ByteOrder byteOrder ) {
 		this.out = out;
         this.order = byteOrder;
@@ -54,6 +56,10 @@ public class NBTWriter {
 		this.buffer.position( 0 );
 		this.buffer.limit( this.buffer.capacity() );
 		this.buffer.order( byteOrder );
+	}
+
+	public void setUseVarint( boolean useVarint ) {
+		this.useVarint = useVarint;
 	}
 
 	public void write( NBTTagCompound compound ) throws IOException {
@@ -71,15 +77,25 @@ public class NBTWriter {
 	private void writeStringValue( String value ) throws IOException {
 		if ( value != null ) {
 			byte[] utf8Bytes = value.getBytes( StandardCharsets.UTF_8 );
-			this.ensureCapacity( 2 + utf8Bytes.length );
-			this.writeShortValue( (short) utf8Bytes.length );
+
+			this.ensureCapacity( ( this.useVarint ? 1 : 2 ) + utf8Bytes.length );
+			if ( this.useVarint ) {
+				this.writeByteValue( (byte) utf8Bytes.length );
+			} else {
+				this.writeShortValue( (short) utf8Bytes.length );
+			}
+
 			this.buffer.put( utf8Bytes );
 		} else {
-			this.writeShortValue( (short) 0 );
+			if ( this.useVarint ) {
+				this.writeByteValue( (byte) 0 );
+			} else {
+				this.writeShortValue( (short) 0 );
+			}
 		}
 	}
 
-	private void writeByteValue( byte value ) throws IOException {
+	void writeByteValue( byte value ) throws IOException {
 		this.ensureCapacity( 1 );
 		this.buffer.put( value );
 	}
@@ -90,8 +106,12 @@ public class NBTWriter {
 	}
 
 	private void writeIntegerValue( int value ) throws IOException {
-		this.ensureCapacity( 4 );
-		this.buffer.putInt( value );
+		if ( this.useVarint ) {
+			VarInt.writeSignedVarInt( this, value );
+		} else {
+			this.ensureCapacity( 4 );
+			this.buffer.putInt( value );
+		}
 	}
 
 	private void writeLongValue( long value ) throws IOException {

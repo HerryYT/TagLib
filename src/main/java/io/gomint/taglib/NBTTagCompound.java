@@ -477,6 +477,16 @@ public class NBTTagCompound implements Cloneable {
 	}
 
 	/**
+	 * Removes given child
+	 *
+	 * @param key The name of the child tag
+	 * @return The object which has been removed or null when nothing has been removed
+	 */
+	public Object remove( String key ) {
+		return this.children.remove( key );
+	}
+
+	/**
 	 * Clones the compound and all of its non-immutable elements recursively. This operation
 	 * may be expensive so use it only if absolutely necessary.
 	 *

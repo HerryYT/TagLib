@@ -17,6 +17,8 @@ public class NBTStreamReader {
     protected ByteBuffer buffer;
     protected ByteOrder byteOrder;
 
+    private boolean useVarint;
+
     protected NBTStreamReader( InputStream in, ByteOrder byteOrder ) {
         this.in = in;
         this.byteOrder = byteOrder;
@@ -28,13 +30,17 @@ public class NBTStreamReader {
         this.buffer.position( 0 );
     }
 
+    public void setUseVarint( boolean useVarint ) {
+        this.useVarint = useVarint;
+    }
+
     protected byte readByteValue() throws IOException {
         this.expectInput( 1, "Invalid NBT Data: Expected byte" );
         return this.buffer.get();
     }
 
     protected String readStringValue() throws IOException {
-        short length = this.readShortValue();
+        short length = this.useVarint ? this.readByteValue() : this.readShortValue();
         this.expectInput( length, "Invalid NBT Data: Expected string bytes" );
         String result = new String( this.buffer.array(), this.buffer.position(), length, "UTF-8" );
         this.buffer.position( this.buffer.position() + length );
@@ -47,6 +53,10 @@ public class NBTStreamReader {
     }
 
     protected int readIntValue() throws IOException {
+        if ( this.useVarint ) {
+            return VarInt.readSignedVarInt( this );
+        }
+
         this.expectInput( 4, "Invalid NBT Data: Expected int" );
         return this.buffer.getInt();
     }
