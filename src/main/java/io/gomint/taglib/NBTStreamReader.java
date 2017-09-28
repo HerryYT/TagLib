@@ -34,13 +34,15 @@ public class NBTStreamReader {
         this.useVarint = useVarint;
     }
 
+
+
     protected byte readByteValue() throws IOException {
         this.expectInput( 1, "Invalid NBT Data: Expected byte" );
         return this.buffer.get();
     }
 
     protected String readStringValue() throws IOException {
-        short length = this.useVarint ? this.readByteValue() : this.readShortValue();
+        int length = this.useVarint ? VarInt.readUnsignedVarInt( this ) : this.readShortValue();
         this.expectInput( length, "Invalid NBT Data: Expected string bytes" );
         String result = new String( this.buffer.array(), this.buffer.position(), length, "UTF-8" );
         this.buffer.position( this.buffer.position() + length );
@@ -62,8 +64,12 @@ public class NBTStreamReader {
     }
 
     protected long readLongValue() throws IOException {
-        this.expectInput( 8, "Invalid NBT Data: Expected long" );
-        return this.buffer.getLong();
+        if ( this.useVarint ) {
+            return VarInt.readSignedVarLong( this ).longValue();
+        } else {
+            this.expectInput( 8, "Invalid NBT Data: Expected long" );
+            return this.buffer.getLong();
+        }
     }
 
     protected float readFloatValue() throws IOException {

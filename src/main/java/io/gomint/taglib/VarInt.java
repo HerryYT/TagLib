@@ -1,15 +1,15 @@
 package io.gomint.taglib;
 
-import io.gomint.taglib.NBTWriter;
-
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.math.BigInteger;
 
 /**
  * @author geNAZt
  * @version 1.0
  */
-public class VarInt {
+class VarInt {
+
+    private static final BigInteger UNSIGNED_LONG_MAX_VALUE = new BigInteger( "FFFFFFFFFFFFFFFF", 16 );
 
     private static long encodeZigZag32( int v ) {
         return (long) ( v << 1 ^ v >> 31 );
@@ -17,6 +17,90 @@ public class VarInt {
 
     private static int decodeZigZag32( long v ) {
         return (int) ( v >> 1 ) ^ -( (int) ( v & 1L ) );
+    }
+
+    private static BigInteger decodeZigZag64( BigInteger v ) {
+        BigInteger left = v.shiftRight( 1 );
+        BigInteger right = v.and( BigInteger.ONE ).negate();
+        return left.xor( right );
+    }
+
+    private static BigInteger encodeZigZag64( long v ) {
+        BigInteger origin = BigInteger.valueOf( v );
+        BigInteger left = origin.shiftLeft( 1 );
+        BigInteger right = origin.shiftRight( 63 );
+        return left.xor( right );
+    }
+
+    static BigInteger readSignedVarLong( NBTStreamReader reader ) throws IOException {
+        BigInteger val = readVarNumber( reader );
+        return decodeZigZag64( val );
+    }
+
+    static void writeSignedVarLong( NBTWriter writer, long value ) throws IOException {
+        BigInteger signedLong = encodeZigZag64( value );
+        writeVarBigInteger( writer, signedLong );
+    }
+
+    private static BigInteger readVarNumber( NBTStreamReader reader ) throws IOException {
+        BigInteger result = BigInteger.ZERO;
+        int offset = 0;
+        int b;
+
+        do {
+            if ( offset >= 10 ) {
+                throw new IllegalArgumentException( "Var Number too big" );
+            }
+
+            b = reader.readByteValue();
+            result = result.or( BigInteger.valueOf( ( b & 0x7f ) << ( offset * 7 ) ) );
+            offset++;
+        } while ( ( b & 0x80 ) > 0 );
+
+        return result;
+    }
+
+    private static void writeVarBigInteger( NBTWriter writer, BigInteger value ) throws IOException {
+        if ( value.compareTo( UNSIGNED_LONG_MAX_VALUE ) > 0 ) {
+            throw new IllegalArgumentException( "The value is too big" );
+        }
+
+        value = value.and( UNSIGNED_LONG_MAX_VALUE );
+        BigInteger i = BigInteger.valueOf( -128 );
+        BigInteger BIX7F = BigInteger.valueOf( 0x7f );
+        BigInteger BIX80 = BigInteger.valueOf( 0x80 );
+        while ( !value.and( i ).equals( BigInteger.ZERO ) ) {
+            writer.writeByteValue( value.and( BIX7F ).or( BIX80 ).byteValue() );
+            value = value.shiftRight( 7 );
+        }
+
+        writer.writeByteValue( value.byteValue() );
+    }
+
+    static void writeUnsignedVarInt( NBTWriter writer, int value ) throws IOException {
+        while ( ( value & -128 ) != 0 ) {
+            writer.writeByteValue( (byte) ( value & 127 | 128 ) );
+            value >>>= 7;
+        }
+
+        writer.writeByteValue( (byte) value );
+    }
+
+    static int readUnsignedVarInt( NBTStreamReader reader ) throws IOException {
+        int out = 0;
+        int bytes = 0;
+        byte in;
+
+        do {
+            in = reader.readByteValue();
+            out |= ( in & 0x7F ) << ( bytes++ * 7 );
+
+            if ( bytes > 6 ) {
+                throw new RuntimeException( "VarInt too big" );
+            }
+        } while ( ( in & 0x80 ) == 0x80 );
+
+        return out;
     }
 
     private static void writeUnsignedVarLong( NBTWriter buffer, long value ) throws IOException {
@@ -44,12 +128,12 @@ public class VarInt {
         return out;
     }
 
-    public static int readSignedVarInt( NBTStreamReader buffer ) throws IOException {
+    static int readSignedVarInt( NBTStreamReader buffer ) throws IOException {
         long val = readUnsignedVarLong( buffer );
         return decodeZigZag32( val );
     }
 
-    public static void writeSignedVarInt( NBTWriter buffer, int value ) throws IOException {
+    static void writeSignedVarInt( NBTWriter buffer, int value ) throws IOException {
         long signedValue = encodeZigZag32( value );
         writeUnsignedVarLong( buffer, signedValue );
     }

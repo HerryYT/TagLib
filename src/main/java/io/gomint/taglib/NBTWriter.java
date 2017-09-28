@@ -77,14 +77,13 @@ public class NBTWriter {
 	private void writeStringValue( String value ) throws IOException {
 		if ( value != null ) {
 			byte[] utf8Bytes = value.getBytes( StandardCharsets.UTF_8 );
-
-			this.ensureCapacity( ( this.useVarint ? 1 : 2 ) + utf8Bytes.length );
 			if ( this.useVarint ) {
-				this.writeByteValue( (byte) utf8Bytes.length );
+				VarInt.writeUnsignedVarInt( this, utf8Bytes.length );
 			} else {
 				this.writeShortValue( (short) utf8Bytes.length );
 			}
 
+			this.ensureCapacity( utf8Bytes.length );
 			this.buffer.put( utf8Bytes );
 		} else {
 			if ( this.useVarint ) {
@@ -115,8 +114,12 @@ public class NBTWriter {
 	}
 
 	private void writeLongValue( long value ) throws IOException {
-		this.ensureCapacity( 8 );
-		this.buffer.putLong( value );
+		if ( this.useVarint ) {
+			VarInt.writeSignedVarLong( this, value );
+		} else {
+			this.ensureCapacity( 8 );
+			this.buffer.putLong( value );
+		}
 	}
 
 	private void writeFloatValue( float value ) throws IOException {
