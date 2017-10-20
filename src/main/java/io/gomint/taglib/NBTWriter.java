@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +75,7 @@ public class NBTWriter {
 
 	private void writeStringValue( String value ) throws IOException {
 		if ( value != null ) {
-			byte[] utf8Bytes = value.getBytes( StandardCharsets.UTF_8 );
+			byte[] utf8Bytes = StringUtil.getUTF8Bytes( value );
 			if ( this.useVarint ) {
 				VarInt.writeUnsignedVarInt( this, utf8Bytes.length );
 			} else {
