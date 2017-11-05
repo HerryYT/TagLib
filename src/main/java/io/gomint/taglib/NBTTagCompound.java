@@ -463,6 +463,15 @@ public class NBTTagCompound implements Cloneable {
     }
 
     /**
+     * Get the amount of children in this compound
+     *
+     * @return amount of children
+     */
+    public int size() {
+        return this.children.size();
+    }
+
+    /**
      * Clones the compound and all of its non-immutable elements recursively. This operation
      * may be expensive so use it only if absolutely necessary.
      *
