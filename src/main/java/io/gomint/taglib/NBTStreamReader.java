@@ -34,7 +34,15 @@ public class NBTStreamReader {
         this.useVarint = useVarint;
     }
 
+    public boolean hasMoreToRead() {
+        try {
+            return this.buffer.limit() > this.buffer.position() || this.in.available() > 0;
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
 
+        return false;
+    }
 
     protected byte readByteValue() throws IOException {
         this.expectInput( 1, "Invalid NBT Data: Expected byte" );
