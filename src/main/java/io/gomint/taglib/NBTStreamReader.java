@@ -142,9 +142,10 @@ public class NBTStreamReader {
             this.buffer.limit( this.buffer.remaining() );
             this.buffer.position( 0 );
 
+            // Try to read, don't fail when you did not read
             int read = this.in.read( this.buffer.array(), this.buffer.limit(), this.buffer.capacity() - this.buffer.limit() );
             if ( read == -1 ) {
-                throw new IOException( "NBT input ended unexpectedly!", new IOException( message ) );
+                return;
             }
 
             // Flip does not really fit here:

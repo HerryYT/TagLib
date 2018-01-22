@@ -26,6 +26,7 @@
 package io.gomint.taglib;
 
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.io.*;
 import java.nio.ByteOrder;
@@ -39,6 +40,7 @@ import java.util.zip.GZIPOutputStream;
  * @author BlackyPaw
  * @version 1.0
  */
+@ToString
 @EqualsAndHashCode()
 public class NBTTagCompound implements Cloneable {
 
