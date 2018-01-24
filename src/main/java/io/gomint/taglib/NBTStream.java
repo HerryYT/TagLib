@@ -52,10 +52,10 @@ public class NBTStream extends NBTStreamReader {
         }
 
         // Start reading the compound
-        this.readTagCompoundValue( this.readStringValue(), false );
+        this.readTagCompoundValue( this.readStringValue(), "", false );
     }
 
-    private NBTTagCompound readTagCompoundValue( String path, boolean readAsCompound ) throws Exception {
+    private NBTTagCompound readTagCompoundValue( String path, String tagName, boolean readAsCompound ) throws Exception {
         boolean manual = false;
         if ( !readAsCompound && this.nbtCompoundAcceptor != null ) {
             // Ask the acceptor if he wants the compound as a whole or not
@@ -65,7 +65,7 @@ public class NBTStream extends NBTStreamReader {
         this.expectInput( 1, "Invalid NBT Data: Expected Tag ID in compound tag" );
         byte tagID = this.readByteValue();
 
-        NBTTagCompound compound = ( readAsCompound ) ? new NBTTagCompound( "" ) : null;
+        NBTTagCompound compound = ( readAsCompound ) ? new NBTTagCompound( tagName ) : null;
         while ( tagID != NBTDefinitions.TAG_END ) {
             String name = this.readStringValue();
             String currentPath = path + "." + name;
@@ -145,11 +145,11 @@ public class NBTStream extends NBTStreamReader {
                     break;
                 case NBTDefinitions.TAG_COMPOUND:
                     if ( compound != null ) {
-                        compound.addValue( name, this.readTagCompoundValue( currentPath, true ) );
+                        compound.addValue( name, this.readTagCompoundValue( currentPath, name, true ) );
                         break;
                     }
 
-                    this.readTagCompoundValue( currentPath, false );
+                    this.readTagCompoundValue( currentPath, name, false );
                     break;
                 case NBTDefinitions.TAG_INT_ARRAY:
                     this.nbtStreamListener.onNBTValue( currentPath, this.readIntArrayValue() );
@@ -290,9 +290,9 @@ public class NBTStream extends NBTStreamReader {
             case NBTDefinitions.TAG_COMPOUND:
                 for ( int i = 0; i < listLength; ++i ) {
                     if ( list != null ) {
-                        list.add( this.readTagCompoundValue( path + "." + String.valueOf( i ), true ) );
+                        list.add( this.readTagCompoundValue( path + "." + String.valueOf( i ), "", true ) );
                     } else {
-                        this.readTagCompoundValue( path + "." + String.valueOf( i ), false );
+                        this.readTagCompoundValue( path + "." + String.valueOf( i ), "", false );
                     }
                 }
 
