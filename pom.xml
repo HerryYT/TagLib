@@ -30,8 +30,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -41,9 +41,8 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.21</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/comitted-libs/lombok-edge.jar</systemPath>
+            <version>1.16.20</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
