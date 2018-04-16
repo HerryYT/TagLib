@@ -44,7 +44,8 @@ public class NBTStreamReaderNoBuffer {
 
     protected short readShortValue() throws IOException {
         this.expectInput( 2, "Invalid NBT Data: Expected short" );
-        return ByteBuffer.allocateDirect( 2 ).put( this.readByteValue() ).put( this.readByteValue() ).order( this.byteOrder ).getShort();
+        byte[] data = new byte[]{this.readByteValue(), this.readByteValue()};
+        return ByteBuffer.wrap( data ).order( this.byteOrder ).getShort();
     }
 
     protected int readIntValue() throws IOException {
@@ -53,8 +54,8 @@ public class NBTStreamReaderNoBuffer {
         }
 
         this.expectInput( 4, "Invalid NBT Data: Expected int" );
-        return ByteBuffer.allocateDirect( 4 ).put( this.readByteValue() ).put( this.readByteValue() )
-                .put( this.readByteValue() ).put( this.readByteValue() ).order( this.byteOrder ).getInt();
+        byte[] data = new byte[]{this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue()};
+        return ByteBuffer.wrap( data ).order( this.byteOrder ).getInt();
     }
 
     protected long readLongValue() throws IOException {
@@ -62,23 +63,23 @@ public class NBTStreamReaderNoBuffer {
             return VarInt.readSignedVarLong( this ).longValue();
         } else {
             this.expectInput( 8, "Invalid NBT Data: Expected long" );
-            return ByteBuffer.allocateDirect( 4 ).put( this.readByteValue() ).put( this.readByteValue() )
-                    .put( this.readByteValue() ).put( this.readByteValue() ).put( this.readByteValue() ).put( this.readByteValue() )
-                    .put( this.readByteValue() ).put( this.readByteValue() ).order( this.byteOrder ).getLong();
+            byte[] data = new byte[]{this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue(),
+                    this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue()};
+            return ByteBuffer.wrap( data ).order( this.byteOrder ).getLong();
         }
     }
 
     protected float readFloatValue() throws IOException {
         this.expectInput( 4, "Invalid NBT Data: Expected float" );
-        return ByteBuffer.allocateDirect( 4 ).put( this.readByteValue() ).put( this.readByteValue() )
-                .put( this.readByteValue() ).put( this.readByteValue() ).order( this.byteOrder ).getFloat();
+        byte[] data = new byte[]{this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue()};
+        return ByteBuffer.wrap( data ).order( this.byteOrder ).getFloat();
     }
 
     protected double readDoubleValue() throws IOException {
         this.expectInput( 8, "Invalid NBT Data: Expected double" );
-        return ByteBuffer.allocateDirect( 4 ).put( this.readByteValue() ).put( this.readByteValue() )
-                .put( this.readByteValue() ).put( this.readByteValue() ).put( this.readByteValue() ).put( this.readByteValue() )
-                .put( this.readByteValue() ).put( this.readByteValue() ).order( this.byteOrder ).getDouble();
+        byte[] data = new byte[]{this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue(),
+                this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue()};
+        return ByteBuffer.wrap( data ).order( this.byteOrder ).getDouble();
     }
 
     protected byte[] readByteArrayValue() throws IOException {
