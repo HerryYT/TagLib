@@ -12,7 +12,6 @@ import java.nio.ByteOrder;
 public class NBTStreamReaderNoBuffer {
 
     protected InputStream in;
-    protected ByteBuffer buffer;
     protected ByteOrder byteOrder;
 
     private boolean useVarint;
@@ -20,12 +19,6 @@ public class NBTStreamReaderNoBuffer {
     protected NBTStreamReaderNoBuffer( InputStream in, ByteOrder byteOrder ) {
         this.in = in;
         this.byteOrder = byteOrder;
-
-        byte[] arrayBuffer = new byte[12];
-        this.buffer = ByteBuffer.wrap( arrayBuffer );
-        this.buffer.order( byteOrder );
-        this.buffer.limit( 0 );
-        this.buffer.position( 0 );
     }
 
     public void setUseVarint( boolean useVarint ) {

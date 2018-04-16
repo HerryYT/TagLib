@@ -43,7 +43,7 @@ public class NBTReaderNoBuffer extends NBTStreamReaderNoBuffer {
 
 	public NBTTagCompound parse() throws IOException {
 		this.expectInput( 3, "Invalid NBT Data: Not enough data to read new tag" );
-		if ( this.buffer.get() != NBTDefinitions.TAG_COMPOUND ) {
+		if ( this.readByteValue() != NBTDefinitions.TAG_COMPOUND ) {
 			throw new IOException( "Invalid NBT Data: No root tag found" );
 		}
 
