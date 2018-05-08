@@ -7,21 +7,40 @@
 
 package io.gomint.taglib;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author geNAZt
  * @version 1.0
  */
 public class StringUtil {
 
+    private static final CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+
+    public static String fromUTF8Bytes( byte[] data, int offset, int length ) {
+        // Try to use sun stuff
+        try {
+            return decoder.decode( ByteBuffer.wrap( data, offset, length ) ).toString();
+        } catch ( CharacterCodingException e ) {
+            // Ignore
+        }
+
+        return null;
+    }
+
     public static byte[] getUTF8Bytes( String input ) {
-        byte[] output = new byte[input.length() * 3];
+        byte[] output = new byte[input.length() * 4];
         int byteCount = 0;
 
         // Fast forward all ascii chars
         int fastForward = 0;
         for ( int i = Math.min( input.length(), output.length );
               fastForward < i && input.charAt( fastForward ) < 128;
-              output[byteCount++] = (byte) input.charAt( fastForward++ ) ) { }
+              output[byteCount++] = (byte) input.charAt( fastForward++ ) ) {
+        }
 
         for ( int i = fastForward; i < input.length(); i++ ) {
             char c = input.charAt( i );

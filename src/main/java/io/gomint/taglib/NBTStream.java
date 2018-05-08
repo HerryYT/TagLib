@@ -192,7 +192,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readByteValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readByteValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readByteValue() );
                     }
                 }
 
@@ -204,7 +204,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readShortValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readShortValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readShortValue() );
                     }
                 }
 
@@ -216,7 +216,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readIntValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readIntValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readIntValue() );
                     }
                 }
 
@@ -228,7 +228,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readLongValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readLongValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readLongValue() );
                     }
                 }
 
@@ -240,7 +240,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readFloatValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readFloatValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readFloatValue() );
                     }
                 }
 
@@ -252,7 +252,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readDoubleValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readDoubleValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readDoubleValue() );
                     }
                 }
 
@@ -262,7 +262,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readByteArrayValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readByteArrayValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readByteArrayValue() );
                     }
                 }
 
@@ -272,7 +272,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readStringValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readStringValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readStringValue() );
                     }
                 }
 
@@ -280,9 +280,9 @@ public class NBTStream extends NBTStreamReader {
             case NBTDefinitions.TAG_LIST:
                 for ( int i = 0; i < listLength; ++i ) {
                     if ( list != null ) {
-                        list.add( this.readTagListValue( path + "." + String.valueOf( i ), true ) );
+                        list.add( this.readTagListValue( path + "." + i, true ) );
                     } else {
-                        this.readTagListValue( path + "." + String.valueOf( i ), false );
+                        this.readTagListValue( path + "." + i, false );
                     }
                 }
 
@@ -290,9 +290,9 @@ public class NBTStream extends NBTStreamReader {
             case NBTDefinitions.TAG_COMPOUND:
                 for ( int i = 0; i < listLength; ++i ) {
                     if ( list != null ) {
-                        list.add( this.readTagCompoundValue( path + "." + String.valueOf( i ), "", true ) );
+                        list.add( this.readTagCompoundValue( path + "." + i, "", true ) );
                     } else {
-                        this.readTagCompoundValue( path + "." + String.valueOf( i ), "", false );
+                        this.readTagCompoundValue( path + "." +  i, "", false );
                     }
                 }
 
@@ -302,7 +302,7 @@ public class NBTStream extends NBTStreamReader {
                     if ( list != null ) {
                         list.add( this.readIntArrayValue() );
                     } else {
-                        this.nbtStreamListener.onNBTValue( path + "." + String.valueOf( i ), this.readIntArrayValue() );
+                        this.nbtStreamListener.onNBTValue( path + "." + i, this.readIntArrayValue() );
                     }
                 }
 

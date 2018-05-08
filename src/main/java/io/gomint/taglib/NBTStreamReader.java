@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * @author geNAZt
@@ -23,8 +24,7 @@ public class NBTStreamReader {
         this.in = in;
         this.byteOrder = byteOrder;
 
-        byte[] arrayBuffer = new byte[BUFFER_SIZE];
-        this.buffer = ByteBuffer.wrap( arrayBuffer );
+        this.buffer = ByteBuffer.allocateDirect( BUFFER_SIZE );
         this.buffer.order( byteOrder );
         this.buffer.limit( 0 );
         this.buffer.position( 0 );
@@ -52,9 +52,11 @@ public class NBTStreamReader {
     protected String readStringValue() throws IOException {
         int length = this.useVarint ? VarInt.readUnsignedVarInt( this ) : this.readShortValue();
         this.expectInput( length, "Invalid NBT Data: Expected string bytes" );
-        String result = new String( this.buffer.array(), this.buffer.position(), length, "UTF-8" );
-        this.buffer.position( this.buffer.position() + length );
-        return result;
+
+        byte[] stringData = new byte[length];
+        this.buffer.get( stringData );
+
+        return StringUtil.fromUTF8Bytes( stringData, 0, length );
     }
 
     protected short readShortValue() throws IOException {
@@ -94,8 +96,7 @@ public class NBTStreamReader {
         int size = this.readIntValue();
         this.expectInput( size, "Invalid NBT Data: Expected byte array data" );
         byte[] result = new byte[size];
-        System.arraycopy( this.buffer.array(), this.buffer.position(), result, 0, size );
-        this.buffer.position( this.buffer.position() + size );
+        this.buffer.get( result );
         return result;
     }
 
@@ -111,16 +112,20 @@ public class NBTStreamReader {
 
     protected void expectInput( int remaining, String message ) throws IOException {
         // Catch the overflow case:
-        if ( remaining > this.buffer.array().length ) {
-            int capacity = this.buffer.array().length;
+        if ( remaining > this.buffer.capacity() ) {
+            int capacity = this.buffer.capacity();
             while ( remaining > capacity ) {
                 capacity *= 2;
             }
 
-            byte[] newArray = new byte[capacity];
             int length = this.buffer.remaining();
-            System.arraycopy( this.buffer.array(), this.buffer.position(), newArray, 0, length );
-            this.buffer = ByteBuffer.wrap( newArray );
+
+            ByteBuffer newBuffer = ByteBuffer.allocateDirect( capacity );
+            byte[] remainingData = new byte[length];
+            this.buffer.get( remainingData );
+            newBuffer.put( remainingData );
+
+            this.buffer = newBuffer;
             this.buffer.order( this.byteOrder );
             this.buffer.limit( length );
             this.buffer.position( 0 );
@@ -137,29 +142,42 @@ public class NBTStreamReader {
     protected void fetchInput( String message ) throws IOException {
         // Got to do some nasty copies here:
         if ( this.buffer.remaining() > 0 ) {
-            // No overwrites following http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#arraycopy(java.lang.Object,%20int,%20java.lang.Object,%20int,%20int)
-            System.arraycopy( this.buffer.array(), this.buffer.position(), this.buffer.array(), 0, this.buffer.remaining() );
-            this.buffer.limit( this.buffer.remaining() );
+            // We want to "move" the rest of the buffer to the front
+            byte[] remain = new byte[this.buffer.remaining()];
+            this.buffer.get( remain );
+
+            this.buffer.limit( remain.length );
             this.buffer.position( 0 );
 
+            // Write back
+            this.buffer.put( remain );
+
             // Try to read, don't fail when you did not read
-            int read = this.in.read( this.buffer.array(), this.buffer.limit(), this.buffer.capacity() - this.buffer.limit() );
+            byte[] maxRead = new byte[this.buffer.capacity() - this.buffer.limit()];
+            int read = this.in.read( maxRead, 0, maxRead.length );
             if ( read == -1 ) {
                 return;
             }
 
             // Flip does not really fit here:
-            this.buffer.limit( this.buffer.limit() + read );
+            this.buffer.limit( remain.length + read );
+
+            // We did read some data
+            this.buffer.put( Arrays.copyOf( maxRead, read ) );
             this.buffer.position( 0 );
         } else {
+            byte[] maxRead = new byte[this.buffer.capacity()];
+
             // Speedier variant if applicable (that is the case quite often, as the buffer is a power of two):
-            int read = this.in.read( this.buffer.array(), 0, this.buffer.capacity() );
+            int read = this.in.read( maxRead, 0, maxRead.length );
             if ( read == -1 ) {
                 throw new IOException( "NBT input ended unexpectedly!", new IOException( message ) );
             }
 
             // Flip does not really fit here:
             this.buffer.limit( read );
+            this.buffer.position( 0 );
+            this.buffer.put( Arrays.copyOf( maxRead, read ) );
             this.buffer.position( 0 );
         }
     }
