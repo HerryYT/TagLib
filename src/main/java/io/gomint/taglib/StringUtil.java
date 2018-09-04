@@ -18,11 +18,17 @@ import java.nio.charset.StandardCharsets;
  */
 public class StringUtil {
 
-    private static final CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+    private static final ThreadLocal<CharsetDecoder> DECODER = new ThreadLocal<>();
 
     public static String fromUTF8Bytes( byte[] data, int offset, int length ) {
         // Try to use sun stuff
         try {
+            CharsetDecoder decoder = DECODER.get();
+            if ( decoder == null ) {
+                decoder = StandardCharsets.UTF_8.newDecoder();
+                DECODER.set( decoder );
+            }
+
             return decoder.decode( ByteBuffer.wrap( data, offset, length ) ).toString();
         } catch ( CharacterCodingException e ) {
             // Ignore
