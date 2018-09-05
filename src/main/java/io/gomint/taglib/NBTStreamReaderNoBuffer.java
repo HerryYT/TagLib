@@ -35,9 +35,7 @@ public class NBTStreamReaderNoBuffer {
         this.expectInput( length, "Invalid NBT Data: Expected string bytes" );
 
         byte[] data = new byte[length];
-        for ( int i = 0; i < length; i++ ) {
-            data[i] = this.readByteValue();
-        }
+        this.in.read( data );
 
         return new String( data, "UTF-8" );
     }
@@ -54,7 +52,8 @@ public class NBTStreamReaderNoBuffer {
         }
 
         this.expectInput( 4, "Invalid NBT Data: Expected int" );
-        byte[] data = new byte[]{this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue()};
+        byte[] data = new byte[4];
+        this.in.read( data );
         return ByteBuffer.wrap( data ).order( this.byteOrder ).getInt();
     }
 
@@ -63,8 +62,8 @@ public class NBTStreamReaderNoBuffer {
             return VarInt.readSignedVarLong( this ).longValue();
         } else {
             this.expectInput( 8, "Invalid NBT Data: Expected long" );
-            byte[] data = new byte[]{this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue(),
-                    this.readByteValue(), this.readByteValue(), this.readByteValue(), this.readByteValue()};
+            byte[] data = new byte[8];
+            this.in.read( data );
             return ByteBuffer.wrap( data ).order( this.byteOrder ).getLong();
         }
     }
