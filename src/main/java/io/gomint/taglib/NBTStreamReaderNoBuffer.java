@@ -37,7 +37,7 @@ public class NBTStreamReaderNoBuffer {
         byte[] data = new byte[length];
         this.in.read( data );
 
-        return new String( data, "UTF-8" );
+        return StringUtil.fromUTF8Bytes( data, 0, data.length );
     }
 
     protected short readShortValue() throws IOException {

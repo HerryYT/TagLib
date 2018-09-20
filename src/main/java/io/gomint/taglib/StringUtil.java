@@ -7,34 +7,28 @@
 
 package io.gomint.taglib;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.StandardCharsets;
-
 /**
  * @author geNAZt
  * @version 1.0
  */
 public class StringUtil {
 
-    private static final ThreadLocal<CharsetDecoder> DECODER = new ThreadLocal<>();
+    private static StringDecoder DECODER;
+
+    static {
+        try {
+            Class.forName( "sun.nio.cs.ArrayDecoder" );
+            DECODER = new SunDirectDecoder();
+
+            // Test decode
+            DECODER.decode( new byte[]{ 37 }, 0, 1 ); // Java 10 has changed the internal UTF 8 decoder to another non array decoder system
+        } catch ( Exception e ) {
+            DECODER = new FallbackDecoder();
+        }
+    }
 
     public static String fromUTF8Bytes( byte[] data, int offset, int length ) {
-        // Try to use sun stuff
-        try {
-            CharsetDecoder decoder = DECODER.get();
-            if ( decoder == null ) {
-                decoder = StandardCharsets.UTF_8.newDecoder();
-                DECODER.set( decoder );
-            }
-
-            return decoder.decode( ByteBuffer.wrap( data, offset, length ) ).toString();
-        } catch ( CharacterCodingException e ) {
-            // Ignore
-        }
-
-        return null;
+        return DECODER.decode( data, offset, length );
     }
 
     public static byte[] getUTF8Bytes( String input ) {
