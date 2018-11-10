@@ -41,8 +41,8 @@ public class NBTReader extends NBTStreamReader {
 		super( in, byteOrder );
 	}
 
-	public NBTTagCompound parse() throws IOException {
-		this.expectInput( 3, "Invalid NBT Data: Not enough data to read new tag" );
+	public NBTTagCompound parse() throws IOException, AllocationLimitReachedException {
+		this.expectInput( 3, "Invalid NBT Data: Not enough data to read new tag", false );
 		if ( this.buffer.get() != NBTDefinitions.TAG_COMPOUND ) {
 			throw new IOException( "Invalid NBT Data: No root tag found" );
 		}
@@ -53,9 +53,10 @@ public class NBTReader extends NBTStreamReader {
 		return root;
 	}
 
-	private NBTTagCompound readTagCompoundValue() throws IOException {
+	private NBTTagCompound readTagCompoundValue() throws IOException, AllocationLimitReachedException {
+		this.alterAllocationLimit( Allocation.COMPOUND );
 		NBTTagCompound compound = new NBTTagCompound();
-		this.expectInput( 1, "Invalid NBT Data: Expected Tag ID in compound tag" );
+		this.expectInput( 1, "Invalid NBT Data: Expected Tag ID in compound tag", false );
 		byte tagID = this.readByteValue();
 		while ( tagID != NBTDefinitions.TAG_END ) {
 			switch ( tagID ) {
@@ -99,16 +100,20 @@ public class NBTReader extends NBTStreamReader {
 					throw new IOException( "Invalid NBT Data: Unknown tag <" + tagID + ">" );
 			}
 
-			this.expectInput( 1, "Invalid NBT Data: Expected tag ID in tag compound" );
+			this.expectInput( 1, "Invalid NBT Data: Expected tag ID in tag compound", false );
 			tagID = this.readByteValue();
 		}
 		return compound;
 	}
 	
-	private List<Object> readTagListValue() throws IOException {
-		this.expectInput( 5, "Invalid NBT Data: Expected TAGList header" );
+	private List<Object> readTagListValue() throws IOException, AllocationLimitReachedException {
+		this.expectInput( 5, "Invalid NBT Data: Expected TAGList header", false );
 		byte listType = this.readByteValue();
 		int listLength = this.readIntValue();
+
+		this.alterAllocationLimit( Allocation.ARRAY_LIST ); 			// 16 byte java object overhead + 4 byte integer for size
+		this.alterAllocationLimit( Allocation.REFERENCE * listLength ); // reference overhead ( for the objects stored inside )
+
 		List<Object> backingList = new ArrayList<>( listLength );
 
 		switch( listType ) {

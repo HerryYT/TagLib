@@ -32,12 +32,12 @@ class VarInt {
         return left.xor( right );
     }
 
-    static BigInteger readSignedVarLong( NBTStreamReader reader ) throws IOException {
+    static BigInteger readSignedVarLong( NBTStreamReader reader ) throws IOException, AllocationLimitReachedException {
         BigInteger val = readVarNumber( reader );
         return decodeZigZag64( val );
     }
 
-    static BigInteger readSignedVarLong( NBTStreamReaderNoBuffer reader ) throws IOException {
+    static BigInteger readSignedVarLong( NBTStreamReaderNoBuffer reader ) throws IOException, AllocationLimitReachedException {
         BigInteger val = readVarNumber( reader );
         return decodeZigZag64( val );
     }
@@ -47,7 +47,7 @@ class VarInt {
         writeVarBigInteger( writer, signedLong );
     }
 
-    private static BigInteger readVarNumber( NBTStreamReader reader ) throws IOException {
+    private static BigInteger readVarNumber( NBTStreamReader reader ) throws IOException, AllocationLimitReachedException {
         BigInteger result = BigInteger.ZERO;
         int offset = 0;
         int b;
@@ -65,7 +65,7 @@ class VarInt {
         return result;
     }
 
-    private static BigInteger readVarNumber( NBTStreamReaderNoBuffer reader ) throws IOException {
+    private static BigInteger readVarNumber( NBTStreamReaderNoBuffer reader ) throws IOException, AllocationLimitReachedException {
         BigInteger result = BigInteger.ZERO;
         int offset = 0;
         int b;
@@ -109,7 +109,7 @@ class VarInt {
         writer.writeByteValue( (byte) value );
     }
 
-    static int readUnsignedVarInt( NBTStreamReader reader ) throws IOException {
+    static int readUnsignedVarInt( NBTStreamReader reader ) throws IOException, AllocationLimitReachedException {
         int out = 0;
         int bytes = 0;
         byte in;
@@ -126,7 +126,7 @@ class VarInt {
         return out;
     }
 
-    static int readUnsignedVarInt( NBTStreamReaderNoBuffer reader ) throws IOException {
+    static int readUnsignedVarInt( NBTStreamReaderNoBuffer reader ) throws IOException, AllocationLimitReachedException {
         int out = 0;
         int bytes = 0;
         byte in;
@@ -153,7 +153,7 @@ class VarInt {
         buffer.writeByteValue( (byte) ( (int) value ) );
     }
 
-    private static long readUnsignedVarLong( NBTStreamReader buffer ) throws IOException {
+    private static long readUnsignedVarLong( NBTStreamReader buffer ) throws IOException, AllocationLimitReachedException {
         long out = 0L;
         int bytes = 0;
 
@@ -169,7 +169,7 @@ class VarInt {
         return out;
     }
 
-    private static long readUnsignedVarLong( NBTStreamReaderNoBuffer buffer ) throws IOException {
+    private static long readUnsignedVarLong( NBTStreamReaderNoBuffer buffer ) throws IOException, AllocationLimitReachedException {
         long out = 0L;
         int bytes = 0;
 
@@ -185,12 +185,12 @@ class VarInt {
         return out;
     }
 
-    static int readSignedVarInt( NBTStreamReader buffer ) throws IOException {
+    static int readSignedVarInt( NBTStreamReader buffer ) throws IOException, AllocationLimitReachedException {
         long val = readUnsignedVarLong( buffer );
         return decodeZigZag32( val );
     }
 
-    static int readSignedVarInt( NBTStreamReaderNoBuffer buffer ) throws IOException {
+    static int readSignedVarInt( NBTStreamReaderNoBuffer buffer ) throws IOException, AllocationLimitReachedException {
         long val = readUnsignedVarLong( buffer );
         return decodeZigZag32( val );
     }

@@ -53,7 +53,7 @@ public class NBTTagCompound implements Cloneable {
      * @return The compound tag that was read from the input source
      * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
      */
-    public static NBTTagCompound readFrom( File file, boolean compressed, ByteOrder byteOrder ) throws IOException {
+    public static NBTTagCompound readFrom( File file, boolean compressed, ByteOrder byteOrder ) throws IOException, AllocationLimitReachedException {
         try ( FileInputStream in = new FileInputStream( file ) ) {
             return readFrom( in, compressed, byteOrder );
         }
@@ -71,7 +71,7 @@ public class NBTTagCompound implements Cloneable {
      * @return The compound tag that was read from the input source
      * @throws IOException Thrown in case an I/O error occurs or invalid NBT data is encountered
      */
-    public static NBTTagCompound readFrom( InputStream in, boolean compressed, ByteOrder byteOrder ) throws IOException {
+    public static NBTTagCompound readFrom( InputStream in, boolean compressed, ByteOrder byteOrder ) throws IOException, AllocationLimitReachedException {
         InputStream input = null;
         try {
             input = new BufferedInputStream( ( compressed ? new GZIPInputStream( in ) : in ) );

@@ -1,5 +1,8 @@
 package io.gomint.taglib;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -12,6 +15,7 @@ import java.util.Arrays;
  */
 public class NBTStreamReader {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger( NBTStreamReader.class );
     private static final int BUFFER_SIZE = 1024 * 16;
 
     protected InputStream in;
@@ -19,6 +23,7 @@ public class NBTStreamReader {
     protected ByteOrder byteOrder;
 
     private boolean useVarint;
+    private int allocateLimit = -1;
 
     protected NBTStreamReader( InputStream in, ByteOrder byteOrder ) {
         this.in = in;
@@ -34,37 +39,42 @@ public class NBTStreamReader {
         this.useVarint = useVarint;
     }
 
+    public void setAllocateLimit( int allocateLimit ) {
+        this.allocateLimit = allocateLimit;
+    }
+
     public boolean hasMoreToRead() {
         try {
             return this.buffer.limit() > this.buffer.position() || this.in.available() > 0;
         } catch ( IOException e ) {
-            e.printStackTrace();
+            LOGGER.error( "Could not read from input for checking if there is more data present", e );
         }
 
         return false;
     }
 
-    protected byte readByteValue() throws IOException {
+    protected byte readByteValue() throws IOException, AllocationLimitReachedException {
         this.expectInput( 1, "Invalid NBT Data: Expected byte" );
         return this.buffer.get();
     }
 
-    protected String readStringValue() throws IOException {
+    protected String readStringValue() throws IOException, AllocationLimitReachedException {
         int length = this.useVarint ? VarInt.readUnsignedVarInt( this ) : this.readShortValue();
         this.expectInput( length, "Invalid NBT Data: Expected string bytes" );
 
         byte[] stringData = new byte[length];
         this.buffer.get( stringData );
 
+        this.alterAllocationLimit( Allocation.STRING );
         return StringUtil.fromUTF8Bytes( stringData, 0, length );
     }
 
-    protected short readShortValue() throws IOException {
+    protected short readShortValue() throws IOException, AllocationLimitReachedException {
         this.expectInput( 2, "Invalid NBT Data: Expected short" );
         return this.buffer.getShort();
     }
 
-    protected int readIntValue() throws IOException {
+    protected int readIntValue() throws IOException, AllocationLimitReachedException {
         if ( this.useVarint ) {
             return VarInt.readSignedVarInt( this );
         }
@@ -73,7 +83,7 @@ public class NBTStreamReader {
         return this.buffer.getInt();
     }
 
-    protected long readLongValue() throws IOException {
+    protected long readLongValue() throws IOException, AllocationLimitReachedException {
         if ( this.useVarint ) {
             return VarInt.readSignedVarLong( this ).longValue();
         } else {
@@ -82,17 +92,17 @@ public class NBTStreamReader {
         }
     }
 
-    protected float readFloatValue() throws IOException {
+    protected float readFloatValue() throws IOException, AllocationLimitReachedException {
         this.expectInput( 4, "Invalid NBT Data: Expected float" );
         return this.buffer.getFloat();
     }
 
-    protected double readDoubleValue() throws IOException {
+    protected double readDoubleValue() throws IOException, AllocationLimitReachedException {
         this.expectInput( 8, "Invalid NBT Data: Expected double" );
         return this.buffer.getDouble();
     }
 
-    protected byte[] readByteArrayValue() throws IOException {
+    protected byte[] readByteArrayValue() throws IOException, AllocationLimitReachedException {
         int size = this.readIntValue();
         this.expectInput( size, "Invalid NBT Data: Expected byte array data" );
         byte[] result = new byte[size];
@@ -100,7 +110,7 @@ public class NBTStreamReader {
         return result;
     }
 
-    protected int[] readIntArrayValue() throws IOException {
+    protected int[] readIntArrayValue() throws IOException, AllocationLimitReachedException {
         int size = this.readIntValue();
         this.expectInput( size * 4, "Invalid NBT Data: Expected int array data" );
         int[] result = new int[size];
@@ -110,7 +120,16 @@ public class NBTStreamReader {
         return result;
     }
 
-    protected void expectInput( int remaining, String message ) throws IOException {
+    protected void expectInput( int remaining, String message ) throws IOException, AllocationLimitReachedException {
+        this.expectInput( remaining, message, true );
+    }
+
+    protected void expectInput( int remaining, String message, boolean alterAllocLimit ) throws IOException, AllocationLimitReachedException {
+        // Check for allocation limits
+        if ( alterAllocLimit  ) {
+            this.alterAllocationLimit( remaining );
+        }
+
         // Catch the overflow case:
         if ( remaining > this.buffer.capacity() ) {
             int capacity = this.buffer.capacity();
@@ -135,6 +154,16 @@ public class NBTStreamReader {
             this.fetchInput( message );
             if ( this.buffer.remaining() < remaining ) {
                 throw new IOException( message );
+            }
+        }
+    }
+
+    protected void alterAllocationLimit( int remaining ) throws AllocationLimitReachedException {
+        if ( this.allocateLimit != -1 ) {
+            if ( this.allocateLimit - remaining < 0 ) {
+                throw new AllocationLimitReachedException( "Could not allocate more bytes due to reaching the set limit" );
+            } else {
+                this.allocateLimit -= remaining;
             }
         }
     }
