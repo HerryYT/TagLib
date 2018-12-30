@@ -16,15 +16,8 @@ public class StringUtil {
     private static StringDecoder DECODER;
 
     static {
-        try {
-            Class.forName( "sun.nio.cs.ArrayDecoder" );
-            DECODER = new SunDirectDecoder();
-
-            // Test decode
-            DECODER.decode( new byte[]{ 37 }, 0, 1 ); // Java 10 has changed the internal UTF 8 decoder to another non array decoder system
-        } catch ( Exception e ) {
-            DECODER = new FallbackDecoder();
-        }
+        // TODO: Add some new performance hacks
+        DECODER = new FallbackDecoder();
     }
 
     public static String fromUTF8Bytes( byte[] data, int offset, int length ) {
